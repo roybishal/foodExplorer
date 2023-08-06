@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RestaurantCard from "./RestaurantCard";
-import Shimmer from "./Shimmer";
+import ShimmerUiCards from "./SimmerUiCards";
 import { Link } from "react-router-dom";
 import { filterData } from "../utils/helper";
 import useOnline from "../utils/useOnline";
@@ -34,7 +34,7 @@ const Body = () => {
     if(!allRestaurants) return null;
 
 
-    return (allRestaurants?.length === 0) ? <Shimmer /> : (
+    return (allRestaurants?.length === 0) ? <ShimmerUiCards /> : (
         <>
         
         <div className="p-3 bg-pink-50 my-5">
