@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import { IMG_CDN_URL } from "../constants";
 import SimmerMenuCards from "./SimmerMenuCards";
 import useRestaurant from "../utils/useRestaurant";
+import Menuu from "./Menuu";
 
 const RestaurantMenu = () => {
   const { resId } = useParams();
@@ -13,6 +13,8 @@ const RestaurantMenu = () => {
         c.card?.["card"]?.["@type"] ===
         "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory"
     );
+
+    console.log(restaurantInfo?.cards[2]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
 
   if (restaurantInfo == null) {
     return <SimmerMenuCards />;
@@ -28,7 +30,7 @@ const RestaurantMenu = () => {
     locality,
   } = restaurantInfo?.cards[0]?.card?.card?.info;
 
-  const Info=restaurantInfo?.cards[0]?.card?.card?.info;
+  const Info = restaurantInfo?.cards[0]?.card?.card?.info;
 
   return (
     <div className=" mt-4  w-3/4 mx-auto min-[320px]:w-auto">
@@ -66,6 +68,17 @@ const RestaurantMenu = () => {
         <h1 className="text-xl font-semibold sm:font-semibold min-[320px]:font-medium text-green-400">
           Menu
         </h1>
+      </div>
+
+      <div>
+        {categories.map((menuitem, index) => {
+          key = { index };
+          return (
+            <>
+              <Menuu menu={menuitem} ></Menuu>
+            </>
+          );
+        })}
       </div>
     </div>
   );

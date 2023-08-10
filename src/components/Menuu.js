@@ -7,7 +7,7 @@ import { IconContext } from "react-icons";
 const Menuu = ({ menu }) => {
   const MenuitemsCards = menu?.card?.card?.itemCards;
 
-  //  console.log(menu)
+   // console.log(MenuitemsCards)
   const [isVisible, setIsVisible] = useState("false");
 
   // menu section
