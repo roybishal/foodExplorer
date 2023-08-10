@@ -45,12 +45,12 @@ const Menuu = ({ menu }) => {
         </div>
 
         {isVisible == "false" &&
-          MenuitemsCards?.map((menuitem, index) => {
-            key = { index };
+          MenuitemsCards?.map((menuitem) => {
+            
 
             return (
               <>
-                <ItemCard fooditem={menuitem}></ItemCard>
+                <ItemCard fooditem={menuitem} key =  {menuitem.card.info.id} ></ItemCard>
               </>
             );
             {
