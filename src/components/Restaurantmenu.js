@@ -76,7 +76,7 @@ const RestaurantMenu = () => {
           key = { index };
           return (
             <>
-              <Menuu menu={menuitem} ></Menuu>
+              <Menuu menu={menuitem} key={index} ></Menuu>
             </>
           );
         })}
