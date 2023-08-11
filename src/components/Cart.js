@@ -1,76 +1,137 @@
-import {  useSelector } from "react-redux/es/hooks/useSelector";
-import EmptyCart from "./EmptyCart";
-import FoodItems from "./FoodItems";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { IMG_CDN_URL } from "../constants";
 import { clearCart } from "../utils/cartSlice";
-import { useDispatch } from "react-redux";
+import OrderNotification from "./OrderNotification";
 
-const Cart= () => {
-    const cartItems=useSelector((store) => store.cart.items );
-    let totalPrice= 0;
+const Cart = () => {
+  const cartItems = useSelector((store) => store.cart.items);
 
-    cartItems.map((item) => {
-        let price= 
-        (item?.card?.info?.price / 100)
-      || (item?.card?.info?.defaultPrice / 100);
-      totalPrice +=price;
+  const [orderNotification,setOrderNotification] =useState(false);
 
-      return totalPrice;
-    });
+ const dispatch = useDispatch();
+  const handleClearCart = () => {
+    dispatch(clearCart());
+     
+  };
 
-    const dispatch=useDispatch();
+ const handlePlaceOrder =()=>{
+    dispatch(clearCart())
+    setOrderNotification(true);
+ }
+  let uniqueFoodItems = [];
+  if (cartItems.length > 0) {
+    let uniqueItems = [...new Set(cartItems)];
 
-    const clearcartHandler = () => {
-        dispatch(clearCart());
-    }
+    uniqueFoodItems = uniqueItems.map((value) => [
+      value,
+      cartItems.filter((item) => item === value).length,
+    ]);
+  }
 
-    return cartItems.length == 0 ? (
+  const totalPrice =
+  cartItems.length > 0
+  ? cartItems
+      .map((item) => item.price > 0 && item.price / 100)
+      .reduce((sum, a) => sum + a, 0)
+  : 0;
+const finalPrice = (totalPrice + 29 + 49).toFixed();
 
-        <EmptyCart />
-    //  empty cart 
-    
-      ) : (
+return (
+<div className="flex flex-col items-center">
+  {cartItems?.length > 0 && (
+    <div className="mt-4 text-center text-lg font-bold">
+      <h3 className="fw-bolder">Cart items - {cartItems.length}</h3>
+    </div>
+  )}
+
+  {cartItems?.length == 0 && (
+    <div className="mt-4  flex flex-col items-center mb-24">
+      <img className="h-44 mt-14" src="https://cdn-icons-png.flaticon.com/512/4555/4555971.png"/>
+      <h1 className="font-bold text-2xl mt-14">Cart Empty</h1>
+      <h2 className="mt-2 font-semibold text-2xl">
+        You can go to{" "}
+        <a href="/" className="font-bold text-orange-600">
+          Home Page
+        </a>{" "}
+        to view more restaurants.
+      </h2>
+    </div>
+  )}
+ 
+    {Object.values(uniqueFoodItems).map((item, index) => {
+      const itemPrice = item[0].price / 100;
+      const itemQty = item[1];
+      return (
         <>
-          <div className="flex w-3/4 m-auto p-4 mt-10  mb-10 lg:w-[92%] sm:w-[95%] min-[320px]:w-auto  justify-center  gap-8 flex-col bg-gray-100 rounded-3xl shadow-2xl">
-            <div className="font-medium flex items-center w-3/4 m-auto justify-between  lg:w-3/4 sm:w-[98%] min-[320px]:w-auto min-[320px]:flex-wrap
-            
-             lg:justify-around md:justify-around sm:justify-between min-[320px]:justify-center gap-4   ">
-              <div>
-                <h2> Your Items : {cartItems.length}</h2>
+         <div className="border-b-4 w-[55%]">
+          <div className="flex my-4 items-center justify-between py-2  border-b-2">
+          <div className="w-[60%]">
+                  <h3 className="text-lg ">{item[0].name} - </h3>
+                  <div className="flex text-gray-600 font-medium">
+                    <div className="flex items-center my-2 text-base ml-0">
+                      <p className="px-2">[qty : {itemQty}]</p>
+                      <span>₹</span> {itemPrice * itemQty}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <img
+                    className="h-[85] rounded-md"
+                    alt="res-img"
+                    src={IMG_CDN_URL + item[0]?.imageId}
+                  />
+                </div>
               </div>
-              <div>
-                <p>Total Charges : {totalPrice} Rs</p>
               </div>
-              <div>
-    
-              {/* clear button for  cart clear */}
-                <button className=" p-2 text-xl bg-red-700 lg:text-xl sm:text-lg min-[320px]:text-base   rounded-md text-white"
-                  onClick={() => clearcartHandler()}
-                >
-                  Clear items
-                </button>
+            </>
+          );
+        })}
+     
+
+      {cartItems.length > 0 ? (
+        <>
+        <div className="flex flex-col w-[55%] my-4 border-b-2 border-b-black">
+          <div className="w-[50%]">
+            <h2>Bill Details</h2>
+            <div className="my-2">
+              <div className="flex items-center justify-between">
+                <p>Item Total</p>{" "}
+                <span className="mx-10">{`₹${totalPrice}`}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p>Delivery Fee</p> <span className="mx-10">₹29</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p>GST and Restaurant Charges</p>
+                <span className="mx-10">₹49</span>
               </div>
             </div>
-    {/*  looping add cart items in cart component  using map  */}
-            <div className=" flex m-auto  w-3/4  lg:w-[90%] md:w-[95%] sm:[95%] min-[320px]:w-auto justify-center     flex-wrap">
-              {cartItems.map((items, index) => {
-                console.log(items);
-    
-                key = { index };
-                return <FoodItems fooditem={items} />;
-              })}
-              </div>
-
-
-<div className="mb-10  flex  justify-end">
-  <button className="bg-green-600 p-3 hover:bg-green-700 text-xl lg:text-xl sm:text-base min-[320px]:text-base rounded-md text-white">
-
-    Order item
-  </button>
-</div>
-</div>
-</>
-);
+          </div>
+        </div>
+        <div className="w-[55%] mb-6">
+            <div className=" flex justify-between font-bold">
+                <div className="flex w-[15%] justify-between">
+                <h2>TO PAY</h2>
+                <span>₹{finalPrice}</span>
+                </div>
+            
+            <div>
+                <button className="bg-orange-600 text-white mx-1 px-2" onClick={()=> handleClearCart()}>Clear Cart</button>
+                <button className="bg-green-700 text-white mx-1 px-2" onClick={() => {
+              handlePlaceOrder();
+            }}>Place Order</button>
+            </div>
+            </div>
+            
+        </div>
+        </>
+      ) : (
+        [null]
+      )}
+      {orderNotification  && <OrderNotification/>}
+    </div>
+  );
 };
 
 export default Cart;
-

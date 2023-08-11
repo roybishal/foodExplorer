@@ -1,86 +1,199 @@
 import { useParams } from "react-router-dom";
 import SimmerMenuCards from "./SimmerMenuCards";
 import useRestaurant from "../utils/useRestaurant";
-import Menuu from "./Menuu";
+import React, { useEffect, useState } from "react";
+import { IMG_CDN_URL } from "../constants";
+import { AiFillInfoCircle, AiFillStar } from "react-icons/ai";
+import { CiDiscount1 } from "react-icons/ci";
+import { FaRupeeSign } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { addItem, removeItem } from "../utils/cartSlice";
+import { Link } from "react-router-dom";
+import { BsFillCartFill } from "react-icons/bs";
 
 const RestaurantMenu = () => {
   const { resId } = useParams();
-  const restaurantInfo = useRestaurant(resId);
+  const cartItems = useSelector((store) => store.cart.items);
 
-  const categories =
-    restaurantInfo?.cards[2]?.groupedCard?.cardGroupMap?.REGULAR?.cards.filter(
-      (c) =>
-        c.card?.["card"]?.["@type"] ===
-        "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory"
-    );
-    // console.log(categories);
-
-    // console.log(restaurantInfo?.cards[2]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
-
-  if (restaurantInfo == null) {
-    return <SimmerMenuCards />;
-  }
+  const { restaurantMenu, restaurantInfo } = useRestaurant(resId);
 
   const {
     name,
-    cuisines,
     areaName,
     avgRatingString,
-    totalRatingsString,
     city,
-    locality,
-  } = restaurantInfo?.cards[0]?.card?.card?.info;
+    cuisines,
+    cloudinaryImageId,
+    feeDetails,
+    aggregatedDiscountInfo,
+    costForTwoMessage,
+    totalRatingsString,
+  } = restaurantInfo;
 
-  const Info = restaurantInfo?.cards[0]?.card?.card?.info;
+  const descriptionList = aggregatedDiscountInfo?.descriptionList || [];
 
-  return (
-    <div className=" mt-4  w-3/4 mx-auto min-[320px]:w-auto">
-      <div className=" text-xs mt-8 w-3/4  m-auto lg:px-10  sm:px-8 min-[300px]:px-0">
-        <p>
-          Home / {city} / {locality} / {name}
-        </p>
-      </div>
+  return Object.keys(restaurantInfo || restaurantMenu).length === 0 ? (
+    <SimmerMenuCards />
+  ) : (
+    <div className="flex flex-col items-center ">
+      <div className="flex items-center justify-around h-40 w-3/5 border-b-2">
+        <div>
+          <h2 className="text-xl font-bold">{name}</h2>
+          <div className="pt-2 pb-4">
+            <p>{cuisines?.join(" , ")}</p>
 
-      <div className=" flex  justify-around   items-center py-5 text-center  min-[320px]:gap-2">
-        <div className=" px-2  min-[350px]:px-1   ">
-          <h3 className="  font-sans  text-2xl font-medium min-[320px]:text-xl">
-            {" "}
-            {name}
-          </h3>
+            <p className="">
+              {areaName} , {city}
+            </p>
+          </div>
 
-          <h3 className=" font-sans ">{cuisines.join(" ,")}</h3>
-
-          <h3 className="  font-sans ">
-            {" "}
-            {areaName} , {Math.round(Info?.sla.lastMileTravel) / 1000} km
-          </h3>
+          <div className="flex items-center">
+            <AiFillInfoCircle style={{ color: "orange" }} />
+            <p className="pl-2"> {feeDetails?.message}</p>
+          </div>
         </div>
 
-        <div className=" border-2 rounded-md p-3 xl:p-3 md:p-2 sm:p-1 min-[310px]:p-1 bg-green-200">
-          <h3 className="text-red-700"> {avgRatingString} ⭐ </h3>
+        <div>
+          <img
+            className="h-24"
+            alt="restaurant-img"
+            src={IMG_CDN_URL + cloudinaryImageId}
+          />
+          <div className="flex items-center">
+            <div className="flex items-center pr-2 text-green-700 font-bold">
+              <AiFillStar />
+              <p>{avgRatingString}</p>
+            </div>
 
-          <hr></hr>
-          <h3>{totalRatingsString}</h3>
+            <p className="font-semibold text-gray-600">
+              {" "}
+              | {totalRatingsString}
+            </p>
+          </div>
         </div>
       </div>
-      <hr className="w-2/3 m-auto h-2"></hr>
 
-      <div className="  w-3/4 mx-auto  my-5">
-        <h1 className="text-xl font-semibold sm:font-semibold min-[320px]:font-medium text-green-400">
-          Menu
-        </h1>
+      <div className="flex justify-around w-3/5 border-b-2 py-4">
+        <div className="flex items-center">
+          <p className="text-base font-bold">{costForTwoMessage}</p>
+        </div>
+        <div className="flex items-center">
+          {descriptionList.map((description) => {
+            return (
+              <div className="flex  items-center border p-2 w-60 text-sm m-2">
+                <CiDiscount1 style={{ color: "brown", fontSize: "40px" }} />{" "}
+                <p className="px-2 text-base font-medium text-gray-500">
+                  {description?.meta}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div>
-        {categories.map((menuitem, index) => {
-          key = { index };
-          return (
-            <>
-              <Menuu menu={menuitem} key={index} ></Menuu>
-            </>
-          );
-        })}
-      </div>
+      {restaurantMenu?.map((item) => {
+        const itemCardsLength = item?.card?.card?.itemCards?.length;
+
+        const dispatch = useDispatch();
+
+        const handleAddItem = (info) => {
+          dispatch(addItem(info));
+        };
+        const handleRemoveItem = (info) => {
+          dispatch(removeItem(info));
+        };
+        return (
+          <div className="w-3/5 my-4 border-b-4">
+            <h2 className="text-xl font-bold" key={item?.card?.info?.id}>
+              {item?.card?.card?.title}{" "}
+              {itemCardsLength && <span>({itemCardsLength})</span>}
+            </h2>
+
+            {item?.card?.card?.itemCards?.map((list) => {
+              const info = list?.card?.info;
+
+              const price = String(info?.price);
+
+              const slicedPrice = (price / 100).toFixed(2);
+
+              return (
+                <>
+                  <div
+                    className="flex items-center justify-between my-2 border-b-2 py-4"
+                    key={info?.id}
+                  >
+                    <div className="">
+                      <p className="text-medium font-semibold">{info?.name}</p>
+                      <p className="flex items-center text-medium">
+                        <FaRupeeSign />
+                        {slicedPrice}
+                      </p>
+                      <p className="my-2 text-gray-400 w-[55%] ">
+                        {info?.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <img
+                        className="h-24 rounded-xl"
+                        src={IMG_CDN_URL + list?.card?.info?.imageId}
+                      />
+
+                      {cartItems.filter((f) => f.id === info.id).length ===
+                      0 ? (
+                        <button
+                          className="px-2   mt-2 bg-white text-sm text-green-600 font-bold border border-gray-500"
+                          onClick={() => {
+                            handleAddItem(info);
+                          }}
+                        >
+                          ADD
+                        </button>
+                      ) : (
+                        <div className="flex items-center mt-2  bg-white text-green-600 font-bold border border-gray-500">
+                          <button
+                            className="mx-2 text-lg"
+                            onClick={() => {
+                              handleRemoveItem(info);
+                            }}
+                          >
+                            -
+                          </button>
+                          <div>
+                            {cartItems.filter((f) => f.id === info.id).length}
+                          </div>
+                          <button
+                            className="mx-2 text-lg"
+                            onClick={() => {
+                              handleAddItem(info);
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {cartItems?.length > 0 && (
+                    <div className="flex justify-between fixed bottom-9 right-3 mb-12 mr-10">
+                      <span className="px-5 py-2 text-sm font-bold tracking-wide text-white rounded-full focus:outline-none"></span>
+                      <Link to="/cart">
+                        <button className="flex items-center px-4 py-2 text-sm font-bold tracking-wide text-white bg-orange-500 rounded-full">
+                          <BsFillCartFill
+                            style={{ fontSize: "1.2rem", paddingRight: "5px" }}
+                          />{" "}
+                          Cart - {""}
+                          {cartItems.length}
+                        </button>
+                      </Link>
+                    </div>
+                  )}
+                </>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 };

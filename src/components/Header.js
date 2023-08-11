@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 // import useOnline from "../utils/useOnline";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { BsFillCartFill } from "react-icons/bs";
+
 
 const Title = () => {
   return (
@@ -15,7 +17,7 @@ const Title = () => {
 const Header = () => {
   const [login, Setlogin] = useState("Login");
 
-  const cartItem = useSelector((store) => store.cart.items);
+  const cartItems= useSelector((store) => store.cart.items);
 
 
 
@@ -40,11 +42,23 @@ const Header = () => {
 
           {/* cart  */}
 
-          <li className="  hover:text-red-400 " data-testid="cart-item">
+          {/* <li className="  hover:text-red-400 " data-testid="cart-item">
             <Link to="/cart">
               <span>cart: {cartItem.length}</span>{" "}
             </Link>
-          </li>
+          </li> */}
+
+<Link to="/cart">
+            <li className="px-6 text-medium font-semibold flex items-center text-gray-600 hover:text-orange-600 ">
+              <BsFillCartFill
+                style={{ fontSize: "1.5rem", marginRight: "8px" }}
+              />
+              Cart
+              <div className="ml-2.5 mb-1  text-xs text-white absolute font-semibold  ">
+                {cartItems.length === 0 ? "" : cartItems.length}
+              </div>
+            </li>
+          </Link>
 
           <button
             className=" px-1  bg-green-500  lg:p-2  lg:px-4 rounded-md text-white "
